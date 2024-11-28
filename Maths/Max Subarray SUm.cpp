@@ -1,7 +1,6 @@
-template<typename T> 
-T maxSubArraySum(vector<T> &a) {
+int maxSubArraySum(vector<int> &a) {
     int left = 0, right = 0, j = 0, n = a.size();
-    T maxSum = INT_MIN, cur = 0;
+    int maxSum = INT_MIN, cur = 0;
     for(int i = 0; i < n; i++) {
         cur += a[i];
         if(maxSum < cur) {

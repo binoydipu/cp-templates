@@ -1,3 +1,16 @@
+// For N numbers in nlogn
+const int N = 2e5 + 9;
+
+vector<int> divisors[N];
+void sieve() { // O(nlogn)
+    for (int i = 1; i < N; i++) {
+        for (int j = i; j < N; j += i) {
+            divisors[j].push_back(i);
+        }
+    }
+}
+
+// For 1 number in sqrt(n)
 vector<int> divisors(int n) {
     vector<int> divs;
     for(int i = 1; i * i <= n; i++) {
