@@ -1,7 +1,9 @@
+const int N = 1e5 + 5;
+
 int m, n; // 20, 1e5
 vector<long long> dp_before, dp_cur;
 
-long long costOf(int i, int j); // complete this for query in O(1)
+long long costOf(int l, int r) {} // edit this
 // compute dp_cur[l], ... dp_cur[r] (inclusive)
 void compute(int l, int r, int optl, int optr) {
     if (l > r) return;
@@ -18,12 +20,13 @@ void compute(int l, int r, int optl, int optr) {
     compute(mid + 1, r, opt, optr);
 }
 
-long long solve() {
-    dp_before.assign(n, 0); dp_cur.assign(n, 0);
-    for (int i = 0; i < n; i++) dp_before[i] = costOf(0, i);
-    for (int i = 1; i < m; i++) {
-        compute(0, n - 1, 0, n - 1);
+long long solve() { // 1-indexed
+    dp_before.assign(n + 1, 0); 
+    dp_cur.assign(n + 1, 0);
+    for (int i = 1; i <= n; i++) dp_before[i] = costOf(1, i);
+    for (int i = 2; i <= m; i++) {
+        compute(1, n, 1, n);
         dp_before = dp_cur;
     }
-    return dp_before[n - 1];
+    return dp_before[n];
 }
