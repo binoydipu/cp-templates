@@ -5,8 +5,6 @@ class DynamicSegTree {
         Node *lc, *rc;
         Node() : sum(0), lazy(0) { lc = rc = NULL; }
     };
-    struct Node *root; // root contains [1, n]
-    const int n; // size of array
 
     inline void expand(Node *n) {
         if(!n->lc) n->lc = new Node();
@@ -49,13 +47,25 @@ class DynamicSegTree {
         int mid = (b + e) >> 1;
         return combine(query(n->lc, b, mid, i, j), query(n->rc, mid + 1, e, i, j));
     }
+    void delete_tree(Node *n) {
+        if(!n) return;
+        delete_tree(n->lc);
+        delete_tree(n->rc);
+        delete n;
+    }
+
+    struct Node *root; // root contains [1, n]
+    const int tR; // size of array
 
   public:
-    DynamicSegTree(int _n) : n(_n) { root = new Node(); }
+    DynamicSegTree(int _n) : tR(_n) { root = new Node(); }
+
+    ~DynamicSegTree() { delete_tree(root); }
+
     void range_upd(int L, int R, long long v) { 
-        return update(root, 1, n, L, R, v); 
+        return update(root, 1, tR, L, R, v); 
     }
     long long range_sum(int L, int R) { 
-        return query(root, 1, n, L, R); 
+        return query(root, 1, tR, L, R); 
     }
 };

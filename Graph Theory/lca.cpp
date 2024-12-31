@@ -1,26 +1,23 @@
-const int N = 2e5 + 9, LOG = 19;
+const int N = 3e5 + 9, LOG = 19;
 
 struct LCA {
-    int n;
-    vector<int> dep, sz;
     vector<vector<int>> g, par;
-    LCA(int _n) : n (_n) {
-        dep.assign(n + 1, 0);
-        sz.assign(n + 1, 0);
-        g.assign(n + 1, vector<int>());
+    vector<int> dep, sz;
+
+    LCA(int n) : dep(n + 1), sz(n + 1), g(n + 1) {
         par.assign(n + 1, vector<int>(LOG + 1));
     }
-    void addEdge(int u, int v) {
+    void add_edge(int u, int v) {
         g[u].push_back(v);
         g[v].push_back(u); 
     }
-    void build(int u, int p = 0) {
+    void dfs(int u, int p = 0) {
         par[u][0] = p;
         sz[u] = 1;
         for (int i = 1; i <= LOG; i++) par[u][i] = par[par[u][i - 1]][i - 1];
         for (auto v : g[u]) if(v != p) {
             dep[v] = dep[u] + 1;
-            build(v, u);
+            dfs(v, u);
             sz[u] += sz[v];
         }
     }
@@ -52,5 +49,16 @@ struct LCA {
         if(dep[u] >= dep[l] + k) return kth(u, k);
         k -= dep[u] - dep[l];
         return kth(v, dep[v] - (dep[l] + k));
+    }
+    // checks if x is in between u->v path
+    bool isInPath(int u, int v, int x) {
+        int l = lca(u, v), l1 = lca(u, x), l2 = lca(v, x);
+        return (l == x || (l1 == l && l2 == x) || (l2 == l && l1 == x));
+    }
+    // returns v's child in who's subtree u exists
+    int inBranch(int u, int v) {
+        if(dep[u] < dep[v]) swap(u, v);
+        u = kth(u, dep[u] - dep[v] - 1); // move u to 1 depth from v
+        return u;
     }
 };

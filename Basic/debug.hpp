@@ -27,13 +27,57 @@ void debug_out(Head H, Tail... T) {
   debug_out(T...);
 }
 
- 
+// Print vector, deque, map, set
 #define dbg(...) cerr<<"Line:"<<__LINE__<<" "<< "[" << #__VA_ARGS__ << "]:", debug_out(__VA_ARGS__)
 // <-
 
-// void dbg(...) { cerr << endl; } template <typename Head, typename... Tail>void dbg(Head H, Tail... T) {cerr << " " << to_string(H);dbg(T...);}
-// void bharo(int N_N) { return; }template <typename Head, typename... Tail>void bharo(int N_N, Head &H, Tail & ... T) {H.resize(N_N);bharo(N_N,T...);}
-// void safai() { return; }template <typename Head, typename... Tail>void safai(Head &H, Tail & ... T) {H.clear();safai(T...);}
 
-#define time cout<<fixed<<setprecision(10); cerr<<"Time:"<<1000*((double)clock())/(double)CLOCKS_PER_SEC<<"ms\n"; 
+// MINE->
+
+template<class T> using minheap = priority_queue<T, vector<T>, greater<T>>;
+
+// Print Time
+// #define time cout<<fixed<<setprecision(10); cerr<<"Time:"<<1000*((double)clock())/(double)CLOCKS_PER_SEC<<"ms\n"; 
+
+//Print array
 #define _print(v) {cerr<<"Line:"<<__LINE__<<" "<< "[" << #v << "]:"<<" [ "; for (auto &i:v){cerr<<i;cerr<<" ";}cerr<<"]";}
+
+template<typename T>
+void print(queue<T> v) { cerr<<"["; while(!v.empty()) { cerr<<v.front(); v.pop(); cerr<<(!v.empty() ? ", " : "]"); } }
+
+template<typename T>
+void print(stack<T> v) { cerr<<"["; while(!v.empty()) { cerr<<v.top(); v.pop(); cerr<<(!v.empty() ? ", " : "]"); } }
+
+template<typename T>
+void print(priority_queue<T> v) { cerr<<"["; while(!v.empty()) { cerr<<v.top(); v.pop(); cerr<<(!v.empty() ? ", " : "]"); } }
+
+template<typename T>
+void print(minheap<T> v) { cerr<<"["; while(!v.empty()) { cerr<<v.top(); v.pop(); cerr<<(!v.empty() ? ", " : "]"); } }
+
+// print execution time
+string exec_time() { auto x = ceil(1000 * ((double)clock()) / (double)CLOCKS_PER_SEC); int z = x; return "Time:" + to_string(z) + "ms"; }
+
+#define _Time_ exec_time()
+void print(string s) { cerr << s; } 
+
+
+// ->
+void print_out() { cerr << endl; }
+
+template <typename Head, typename... Tail>
+void print_out(Head H, Tail... T) {
+  cerr << " "; print(H);
+  print_out(T...);
+}
+
+// To print stack, queue, priority queue, execution Time
+#define print(...) cerr<<"Line:"<<__LINE__<<" "<< "[" << #__VA_ARGS__ << "]:", print_out(__VA_ARGS__)
+// <-
+
+
+#ifdef LOCAL
+#include "debug.hpp"
+#else
+#define dbg(...) 42
+#define print(...) 42
+#endif

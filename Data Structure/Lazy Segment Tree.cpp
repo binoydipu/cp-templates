@@ -1,32 +1,36 @@
-const int N = 5e5 + 9;
-int a[N];
-struct LazySegmentTree {
+const int N = 3e5 + 9;
+long long a[N];
+
+template<typename _Tp>
+class LazySegmentTree {
+  private:
     #define lc (n << 1)
     #define rc ((n << 1) | 1)
-    long long t[4 * N], lazy[4 * N];
-    LazySegmentTree() {
-        memset(t, 0, sizeof t);
-        memset(lazy, 0, sizeof lazy);
-    }
+    struct Node {
+        _Tp val, lazy;
+        Node() : val(0), lazy(0) {}
+        Node(_Tp _val) : val(_val), lazy(0) {}
+    };
+    
     inline void push(int n, int b, int e) {
-        if (lazy[n] == 0) return;
-        t[n] = t[n] + lazy[n] * (e - b + 1);
+        if (t[n].lazy == 0) return;
+        t[n].val = t[n].val + t[n].lazy * (e - b + 1);
         if (b != e) {
-            lazy[lc] = lazy[lc] + lazy[n];
-            lazy[rc] = lazy[rc] + lazy[n];
+            t[lc].lazy = t[lc].lazy + t[n].lazy;
+            t[rc].lazy = t[rc].lazy + t[n].lazy;
         }
-        lazy[n] = 0;
+        t[n].lazy = 0;
     }
-    inline long long combine(long long a,long long b) {
-        return a + b;
+    inline Node combine(const Node& a, const Node& b) {
+        return Node(a.val + b.val);
     }
     inline void pull(int n) {
-        t[n] = t[lc] + t[rc];
+        t[n].val = t[lc].val + t[rc].val;
     }
     void build(int n, int b, int e) {
-        lazy[n] = 0;
+        t[n].lazy = 0;
         if (b == e) {
-            t[n] = a[b];
+            t[n].val = a[b];
             return;
         }
         int mid = (b + e) >> 1;
@@ -34,11 +38,11 @@ struct LazySegmentTree {
         build(rc, mid + 1, e);
         pull(n);
     }
-    void upd(int n, int b, int e, int i, int j, long long v) {
+    void upd(int n, int b, int e, int i, int j, _Tp v) {
         push(n, b, e);
-        if (j < b || e < i) return;
+        if (b > e || j < b || e < i) return;
         if (i <= b && e <= j) {
-            lazy[n] = v; //set lazy
+            t[n].lazy = v; // set lazy
             push(n, b, e);
             return;
         }
@@ -47,11 +51,28 @@ struct LazySegmentTree {
         upd(rc, mid + 1, e, i, j, v);
         pull(n);
     }
-    long long query(int n, int b, int e, int i, int j) {
+    Node query(int n, int b, int e, int i, int j) {
         push(n, b, e);
-        if (i > e || b > j) return 0; //return null
+        if (b > e || i > e || b > j) return Node(); // return null
         if (i <= b && e <= j) return t[n];
         int mid = (b + e) >> 1;
         return combine(query(lc, b, mid, i, j), query(rc, mid + 1, e, i, j));
     }
-}t;
+
+    const int root, tL, tR;
+    vector<Node> t;
+
+  public:
+    LazySegmentTree(int b, int e) : root(1), tL(b), tR(e) {
+        t.resize(4 * tR);
+        build(root, tL, tR); 
+    }
+    // Update in range [i, j] with v
+    void range_upd(int i, int j, _Tp v) {
+        upd(root, tL, tR, i, j, v);
+    }
+    // Query in range [i, j]
+    _Tp range_query(int i, int j) {
+        return query(root, tL, tR, i, j).val;
+    }
+};

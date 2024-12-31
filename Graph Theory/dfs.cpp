@@ -2,22 +2,31 @@ const int N = 2e5 + 9;
 
 int a[N];
 struct Dfs {
-    int n;
-    vector<int> lvl;
     vector<vector<int>> g;
-    Dfs(int _n) : n (_n) {
-        lvl.assign(n + 1, 0);
-        g.assign(n + 1, vector<int>());
-    }
-    void addEdge(int u, int v) {
+    vector<int> lvl;
+    vector<bool> vis;
+
+    Dfs(int n) : lvl(n + 1), vis(n + 1), g(n + 1) {}
+
+    void add_edge(int u, int v) {
         g[u].push_back(v);
         g[v].push_back(u); 
     }
     void dfs(int v, int p = -1) {
-        for(auto u : g[v]) {
-            if(u == p) continue;
+        vis[v] = true;
+        for(auto u : g[v]) if(!vis[u]) {
             lvl[u] = 1 + lvl[v];
             dfs(u, v);
         }
     }
 };
+
+
+auto dfs = [&](auto self, int u, int p) -> void {
+    dbg(u);
+    for (int v : g[u]) {
+        if (v == p) continue;
+        self(self, v, u);
+    }
+};
+// dfs(dfs, 1, 0);

@@ -1,64 +1,60 @@
 const int N = 1e6 + 9, B = 440;
 
-struct query {
+struct Query {
     int l, r, id;
-    bool operator < (const query &x) const {
-        if(l / B == x.l / B) return ((l / B) & 1) ? r > x.r : r < x.r;
-        return l / B < x.l / B;
+    Query() {}
+    Query(int _id, int _l, int _r) : id(_id), l(_l), r(_r) {}
+    bool operator<(const Query& other) const {
+        if(l / B == other.l / B) return ((l / B) & 1) ? r > other.r : r < other.r;
+        return l / B < other.l / B;
     }
 } Q[N];
+
 int cnt[N], a[N];
-long long odds; // no of odd elements [l, r]
+long long uniq; // no of distinct elements [l, r]
+
 inline void add_left(int i) {
     int x = a[i];
-    odds = odds + (cnt[x] % 2 == 0 ? 1 : -1); // edit this
     ++cnt[x];
+    uniq += (cnt[x] == 1);
 }
 inline void add_right(int i) {
     int x = a[i];
-    odds = odds + (cnt[x] % 2 == 0 ? 1 : -1);
     ++cnt[x];
+    uniq += (cnt[x] == 1);
 }
 inline void rem_left(int i) {
     int x = a[i];
-    odds = odds + (cnt[x] % 2 == 0 ? 1 : -1);
+    uniq -= (cnt[x] == 1);
     --cnt[x];
 }
 inline void rem_right(int i) {
     int x = a[i];
-    odds = odds + (cnt[x] % 2 == 0 ? 1 : -1);
+    uniq -= (cnt[x] == 1);
     --cnt[x];
 }
+int get_ans(int l, int r) { // edit this
+    return uniq;
+}
+
 long long ans[N];
 
-void processQuery(int q) {
+void processQ(int q) {
+    sort(Q + 1, Q + q + 1);
+    int curL = 1, curR = 0;
     for(int i = 1; i <= q; i++) {
-        cin >> Q[i].l >> Q[i].r;
-        Q[i].id = i;
-    }
-    sort(Q + 1, Q + q + 1); // sorting query optimally
-    int l = 1, r = 0;
-    for(int i = 1; i <= q; i++) {
-        int L = Q[i].l, R = Q[i].r; 
-        if(R < l) {
-            while (l > L) add_left(--l);
-            while (l < L) rem_left(l++);
-            while (r < R) add_right(++r);
-            while (r > R) rem_right(r--);
+        int ql = Q[i].l, qr = Q[i].r; 
+        if(qr < curL) {
+            while (curL > ql) add_left(--curL);
+            while (curL < ql) rem_left(curL++);
+            while (curR < qr) add_right(++curR);
+            while (curR > qr) rem_right(curR--);
         } else {
-            while (r < R) add_right(++r);
-            while (r > R) rem_right(r--);
-            while (l > L) add_left(--l);
-            while (l < L) rem_left(l++);
+            while (curR < qr) add_right(++curR);
+            while (curR > qr) rem_right(curR--);
+            while (curL > ql) add_left(--curL);
+            while (curL < ql) rem_left(curL++);
         }
-        ans[Q[i].id] = ((r - l + 1) - odds) / 2;
+        ans[Q[i].id] = get_ans(curL, curR);
     }
-}
-int32_t main() {
-    int n; cin >> n;
-    for (int i = 1; i <= n; i++) cin >> a[i];
-    int q; cin >> q;
-    processQuery(q); 
-    for(int i = 1; i <= q; i++) cout << ans[i] << nl;
-    return 0;
 }
