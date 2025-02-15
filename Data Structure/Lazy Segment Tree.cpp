@@ -1,15 +1,14 @@
 const int N = 3e5 + 9;
 long long a[N];
 
-template<typename _Tp>
 class LazySegmentTree {
   private:
     #define lc (n << 1)
     #define rc ((n << 1) | 1)
     struct Node {
-        _Tp val, lazy;
+        int val, lazy;
         Node() : val(0), lazy(0) {}
-        Node(_Tp _val) : val(_val), lazy(0) {}
+        Node(int _val) : val(_val), lazy(0) {}
     };
     
     inline void push(int n, int b, int e) {
@@ -38,7 +37,7 @@ class LazySegmentTree {
         build(rc, mid + 1, e);
         pull(n);
     }
-    void upd(int n, int b, int e, int i, int j, _Tp v) {
+    void upd(int n, int b, int e, int i, int j, int v) {
         push(n, b, e);
         if (b > e || j < b || e < i) return;
         if (i <= b && e <= j) {
@@ -67,12 +66,10 @@ class LazySegmentTree {
         t.resize(4 * tR);
         build(root, tL, tR); 
     }
-    // Update in range [i, j] with v
-    void range_upd(int i, int j, _Tp v) {
+    void range_upd(int i, int j, int v) {
         upd(root, tL, tR, i, j, v);
     }
-    // Query in range [i, j]
-    _Tp range_query(int i, int j) {
+    int range_query(int i, int j) {
         return query(root, tL, tR, i, j).val;
     }
 };
