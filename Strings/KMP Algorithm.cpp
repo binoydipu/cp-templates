@@ -1,11 +1,11 @@
+// Builds the longest proper prefix array of pattern p
+// where lps[i]=longest proper prefix which is also suffix of p[0...i]
 struct KMP {
     string p; int psz; // 0-indexed
     vector<int> lps;
 
     KMP() {}
-    // builds the longest proper prefix array of pattern p
-    // where lps[i]=longest proper prefix which is also suffix of p[0...i]
-    KMP(string _p) : p(_p), psz(p.size()){
+    KMP(string _p) : p(_p), psz(p.size()) {
         lps.resize(psz + 1);
         int j = 0;
         lps[0] = 0;
