@@ -36,5 +36,10 @@ struct KMP {
             // after each loop we have j=longest common suffix of s[0..i] which is also prefix of p
         }
         return ans;
-    }  
+    }
+    int smallest_period() {
+        int period = psz - lps[psz - 1];
+        if(psz % period == 0) return period; // Check if string is fully periodic
+        return psz; // no period exists
+    }
 };

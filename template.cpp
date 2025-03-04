@@ -1,6 +1,6 @@
 /**
  *    author:   Binoy Barman
- *    created:  2025-02-15 14:07:55
+ *    created:  2025-03-04 18:26:57
 **/
 
 #include<bits/stdc++.h>
@@ -26,7 +26,7 @@ template<typename T> istream& operator>>(istream& in, vector<T>& a) {for(auto &x
 template<typename T> ostream& operator<<(ostream& out, vector<T>& a) {bool first = true;for(auto &x : a) {if(!first) out << ' ';first = false;out << x;}return out;};
 
 namespace Dark_Lord_Binoy {
-inline void setup() {
+inline void init() {
     ios::sync_with_stdio(false); 
     cin.tie(nullptr);
 
@@ -38,7 +38,7 @@ inline void setup() {
 }
 
 int32_t main() {
-    Dark_Lord_Binoy::setup();
+    Dark_Lord_Binoy::init();
     Testcase_Handler {
         
     }
