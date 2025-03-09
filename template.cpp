@@ -5,7 +5,7 @@
 
 #include<bits/stdc++.h>
 #ifdef LOCAL
-#include "debug/trace.hpp"
+#include "debug/debug.hpp"
 #else
 #define dbg(...) 42
 #define print(...) 42
