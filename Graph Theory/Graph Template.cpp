@@ -1,80 +1,70 @@
-template<class T> using minheap = priority_queue<T, vector<T>, greater<T>>;
-
-const int N = 2e5 + 9;
-int a[N];
-
-class Graph {
-  private:
-    struct Edge {
-        int to, w;
-        Edge() : to(0), w(1) {}
-        Edge(int _to) : to(_to), w(1) {}
-        Edge(int _to, int _w) : to(_to), w(_w) {}
+template <typename T>
+class graph {
+  public:
+    struct edge {
+        int from;
+        int to;
+        T cost;
     };
-    vector<vector<Edge>> g;
-    vector<int> lvl, dis;
+
+    vector<edge> edges;
+    vector<vector<int>> g;
+    int n;
+
+    graph(int _n) : n(_n) {
+        g.resize(n + 1);
+    }
+
+    int add_edge(int from, int to, T cost = 1) {
+        int id = (int) edges.size();
+        g[from].push_back(to);
+        g[to].push_back(from);
+        edges.push_back({from, to, cost});
+        return id;
+    }
+
+    graph<T> reverse() const {
+        graph<T> rev(n);
+        for(auto &e : edges) {
+            rev.add_edge(e.to, e.from, e.cost);
+        }
+        return rev;
+    }
+
+    virtual ~graph() = default;
+};
+
+template <typename T>
+class Dfs : public graph<T> {
+  public:
+    using graph<T>::edges;
+    using graph<T>::g;
+    using graph<T>::n;
+
+    vector<int> lvl;
     vector<bool> vis;
-    const int V;
 
-  public: 
-    Graph(int n) : lvl(n + 1, 0), vis(n + 1, 0), V(n) {
-        g.assign(V + 1, vector<Edge>());
+    Dfs(int _n) : graph<T>(_n), lvl(_n + 1, 0), vis(_n + 1, false) {}
+
+    void reset() {
+        fill(lvl.begin(), lvl.end(), 0);
+        fill(vis.begin(), vis.end(), false);
     }
 
-    void add_edge(int u, int v, int w = 1) {
-        g[u].push_back(Edge(v, w));
-        g[v].push_back(Edge(u, w)); 
-    }
-    void dfs(int v, int p = -1) {
-        vis[v] = true;
-        for(auto adj : g[v]) if(!vis[adj.to]) {
-            int to = adj.to, w = adj.w;
-            lvl[to] = 1 + lvl[v];
-            dfs(to, v);
+    void dfs(int u, int p = -1) {
+        vis[u] = true;
+        for(auto v : g[u]) {
+            if(vis[v]) continue;
+            dfs(v, u);
         }
     }
-    int bfs(int st) {
-        vis.assign(V + 1, false);
-        vis[st] = true;
-        queue<int> q;
-        q.push(st);
-        int cnt = 0;
 
-        while (!q.empty()) {
-            int v = q.front();
-            q.pop();
-            cnt++;
-            for (auto adj : g[v]) if (!vis[adj.to]) {
-                int to = adj.to, w = adj.w;
-                vis[to] = true;
-                lvl[to] = lvl[v] + 1;
-                q.push(to);
+    void dfs_all() {
+        fill(vis.begin(), vis.end(), false);
+        for (int v = 1; v <= n; v++) {
+            if (!vis[v]) {
+                dfs(v);
             }
         }
-        return cnt;
-    }
-    vector<int> dijkstra(int st) {
-        dis.assign(V + 1, inf);
-        vis.assign(V + 1, false);
-        minheap<pair<int, int>> pq;
-
-        dis[st] = 0;
-        pq.push({0, st}); // <distance, node>
-
-        while(!pq.empty()) {
-            int v = pq.top().second;
-            pq.pop();
-            if(vis[v]) continue; 
-            vis[v] = true;
-            for (auto adj : g[v]) {
-                int to = adj.to; 
-                int cost = adj.w; 
-                if (dis[v] + cost < dis[to]) {
-                    dis[to] = dis[v] + cost;
-                    pq.push({dis[to], to});
-                }
-            }
-        }
-        return dis;
     }
 };
