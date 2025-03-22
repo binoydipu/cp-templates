@@ -1,29 +1,38 @@
-const int N = 1e5 + 9;
+class SparseTable {
+  public:
+    int n, max_log;
+    vector<vector<int>> mat; // 1-indexed
 
-int a[N];
-struct SparseTable {
-    int t[N][18][2], logs[N];
-    SparseTable() {
-        memset(t, 0, sizeof t);
-        memset(logs, 0, sizeof logs);
-        for (int i = 2; i < N; i++) logs[i] = logs[i >> 1] + 1;
+    inline int func(int l, int r) {
+        return max(l, r);
     }
-    void build(int n) { // O(nlogn)
-        for(int i = 1; i <= n; i++) t[i][0][0] = t[i][0][1] = a[i];
-        for(int k = 1; k < 18; k++) {
-            for(int i = 1; i + (1 << k) - 1 <= n; i++) {
-                t[i][k][0] = min(t[i][k - 1][0], t[i + (1 << (k - 1))][k - 1][0]);
-                t[i][k][1] = max(t[i][k - 1][1], t[i + (1 << (k - 1))][k - 1][1]);
+
+    SparseTable(const vector<int>& a) : n((int) a.size()) {
+        max_log = 32 - __builtin_clz(n);
+        mat.resize(n + 1, vector<int>(max_log));
+        for (int i = 1; i <= n; i++) mat[i][0] = a[i - 1];
+        for (int k = 1; k < max_log; k++) {
+            for (int i = 1; i + (1 << k) - 1 <= n; i++) {
+                mat[i][k] = func(mat[i][k - 1], mat[i + (1 << (k - 1))][k - 1]);
             }
         }
     }
-    int minQuery(int l, int r) { // O(1)
-        // int k = 31 - __builtin_clz(r - l + 1);
-        int k = logs[r - l + 1];
-        return min(t[l][k][0], t[r - (1 << k) + 1][k][0]);
+
+    // idempotent - to get max, min, gcd, and, or; -> O(1)
+    int query(int from, int to) {
+        int k = 31 - __builtin_clz(to - from + 1);
+        return func(mat[from][k], mat[to - (1 << k) + 1][k]);
     }
-    int maxQuery(int l, int r) { // O(1)
-        int k = logs[r - l + 1];
-        return max(t[l][k][1], t[r - (1 << k) + 1][k][1]);
+
+    // non-idempotent - to get sum, count, lcm, xor -> O(logn)
+    int query2(int from, int to) {
+        int res = -1; // neutral value
+        for (int k = max_log - 1; k >= 0; k--) {
+            if((1 << k) <= to - from + 1) {
+                res = func(res, mat[from][k]);
+                from += (1 << k);
+            }
+        }
+        return res;
     }
-}st;
+};
