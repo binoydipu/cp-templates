@@ -18,6 +18,10 @@ string to_string(tuple<A, B, C, D> p) {return "(" + to_string(get<0>(p)) + ", " 
 template<class T> bool ckmin(T& a, const T& b) { return b < a ? a = b, 1 : 0; }
 template<class T> bool ckmax(T& a, const T& b) { return a < b ? a = b, 1 : 0; }
 
+
+struct Point;
+string to_string(const Point& p);
+
 // ->
 void debug_out() { cerr << endl; }
 
@@ -42,6 +46,9 @@ template<class T> using minheap = priority_queue<T, vector<T>, greater<T>>;
 //Print array
 #define _print(v) {cerr<<"Line:"<<__LINE__<<" "<< "[" << #v << "]:"<<" [ "; for (auto &i:v){cerr<<i;cerr<<" ";}cerr<<"]";}
 
+template <typename K, typename V>
+void print(pair<K, V> p) { cerr << "(" << p.first << ", " << p.second << ")"; }
+
 template<typename T>
 void print(queue<T> v) { cerr<<"["; while(!v.empty()) { cerr<<v.front(); v.pop(); cerr<<(!v.empty() ? ", " : "]"); } }
 
@@ -50,6 +57,9 @@ void print(stack<T> v) { cerr<<"["; while(!v.empty()) { cerr<<v.top(); v.pop(); 
 
 template<typename T>
 void print(priority_queue<T> v) { cerr<<"["; while(!v.empty()) { cerr<<v.top(); v.pop(); cerr<<(!v.empty() ? ", " : "]"); } }
+
+template <typename K, typename V>
+void print(priority_queue<pair<K, V>> v) { cerr<<"["; while(!v.empty()) { print(v.top()); v.pop(); cerr<<(!v.empty() ? ", " : "]"); } }
 
 template<typename T>
 void print(minheap<T> v) { cerr<<"["; while(!v.empty()) { cerr<<v.top(); v.pop(); cerr<<(!v.empty() ? ", " : "]"); } }
@@ -73,11 +83,3 @@ void print_out(Head H, Tail... T) {
 // To print stack, queue, priority queue, execution Time
 #define print(...) cerr<<"Line:"<<__LINE__<<" "<< "[" << #__VA_ARGS__ << "]:", print_out(__VA_ARGS__)
 // <-
-
-
-#ifdef LOCAL
-#include "debug.hpp"
-#else
-#define dbg(...) 42
-#define print(...) 42
-#endif
