@@ -32,7 +32,7 @@ class List {
     }
 
     node *front, *back;
-    int N;
+    int32_t N;
 
     class Iterator {
       private:
@@ -147,13 +147,20 @@ class List {
         front = back = nullptr;
     }
 
+    List(initializer_list<T> init_list) : N(0) {
+        front = back = nullptr;
+        for(const auto &_x : init_list) Push_back(_x);
+    }
+
+    ~List() { Clear(); }
+
     Iterator begin() { return Iterator(front); }
     Iterator end() { return Iterator(nullptr); }
 
     ReverseIterator rbegin() { return ReverseIterator(back); }
     ReverseIterator rend() { return ReverseIterator(nullptr); }
 
-    uint32_t Size() const { return N; }
+    int32_t Size() const { return N; }
 
     T Front() { assert(front); return front->val; }
     T Back() { assert(back); return back->val; }
@@ -162,7 +169,7 @@ class List {
 
     List<T> operator=(List<T>& __b) { // O(N)
         Clear();
-        for(auto _x : __b) Push_back(_x);
+        for(const auto &_x : __b) Push_back(_x);
     }
 
     // Don't use, works in O(N) per call, so O(N^2) for a traverse
@@ -308,9 +315,14 @@ int32_t main() {
 
     List<int> li;
     li.Push_back(1);
-    li.Push_front(2);
     li.Push_back(3);
+    li.Push_front(2);
+    li.Sort(false);
     li.Print();
+    for(auto x : li) {
+        cout << x << ' ';
+    }
+    cout << endl;
 
     List<string> a;
     a.Push_back("binoy");
