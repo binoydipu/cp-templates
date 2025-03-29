@@ -1,24 +1,27 @@
-// graph must be DAG - Directed Acyclic Graph
-int n;
-const int N = 2e5 + 5;
-vector<int> g[N]; vector<bool> vis; vector<int> ts;
-
-void dfs(int u) {
-    vis[u] = true;
-    for(auto v : g[u]) {
-        if(!vis[v]) {
-            dfs(v);
+template <typename T>
+vector<int> find_topsort(const graph<T> &g) { // g must be DAG
+    vector<int> deg(g.n + 1, 0);
+    for (int id = 0; id < (int) g.edges.size(); id++) {
+        deg[g.edges[id].to]++;
+    }
+    queue<int> q;
+    for (int i = 1; i <= g.n; i++) {
+        if(deg[i] == 0) q.push(i);
+    }
+    vector<int> ts;
+    while(!q.empty()) {
+        int v = q.front();
+        q.pop();
+        ts.push_back(v);
+        for(auto id : g.g[v]) {
+            auto &e = g.edges[id];
+            int to = e.from ^ e.to ^ v;
+            deg[to]--;
+            if(deg[to] == 0) q.push(to);
         }
     }
-    ts.push_back(u);
-}
-void topSort() {
-    vis.assign(n + 1, false);
-    ts.clear();
-    for (int i = 1; i <= n; i++) {
-        if(!vis[i]) {
-            dfs(i);
-        }
+    if(ts.size() != g.n) {
+        return vector<int>();
     }
-    reverse(ts.begin(), ts.end());
+    return ts;
 }

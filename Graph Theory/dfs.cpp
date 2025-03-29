@@ -1,32 +1,49 @@
-const int N = 2e5 + 9;
+template <typename T>
+class dfs_graph : public graph<T> {
+  public:
+    using graph<T>::edges;
+    using graph<T>::g;
+    using graph<T>::n;
 
-int a[N];
-struct Dfs {
-    vector<vector<int>> g;
+    vector<int> par;
     vector<int> lvl;
-    vector<bool> vis;
+    vector<int> sz;
+    vector<int> vis;
+    vector<int> order;
 
-    Dfs(int n) : lvl(n + 1), vis(n + 1), g(n + 1) {}
-
-    void add_edge(int u, int v) {
-        g[u].push_back(v);
-        g[v].push_back(u); 
+    dfs_graph(int _n) : graph<T>(_n) {
+        init();
     }
-    void dfs(int v, int p = -1) {
-        vis[v] = true;
-        for(auto u : g[v]) if(!vis[u]) {
-            lvl[u] = 1 + lvl[v];
-            dfs(u, v);
+
+    void init() {
+        par = vector<int>(n + 1, -1);
+        lvl = vector<int>(n + 1, 0);
+        sz = vector<int>(n + 1, 0);
+        vis = vector<int>(n + 1, 0);
+    }
+
+    void dfs(int v) {
+        vis[v] = 1; 
+        sz[v] = 1;
+        order.push_back(v);
+        for(auto id : g[v]) {
+            auto &e = edges[id];
+            int to = e.from ^ e.to ^ v;
+            if(vis[to] != 0) {
+                continue;
+            }
+            lvl[to] = 1 + lvl[v];
+            par[to] = v;
+            dfs(to);
+            sz[v] += sz[to];
+        }
+    }
+
+    void dfs_all() {
+        for (int v = 1; v <= n; v++) {
+            if (vis[v] == 0) {
+                dfs(v);
+            }
         }
     }
 };
-
-
-auto dfs = [&](auto self, int u, int p) -> void {
-    dbg(u);
-    for (int v : g[u]) {
-        if (v == p) continue;
-        self(self, v, u);
-    }
-};
-// dfs(dfs, 1, 0);
