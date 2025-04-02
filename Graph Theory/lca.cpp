@@ -1,64 +1,89 @@
-const int N = 3e5 + 9, LOG = 19;
+template <typename T> 
+class lca_graph : public graph<T> {
+  public:
+    using graph<T>::edges;
+    using graph<T>::g;
+    using graph<T>::n;
 
-struct LCA {
-    vector<vector<int>> g, par;
-    vector<int> dep, sz;
+    int max_depth;
+    vector<int> depth;
+    vector<int> sz;
+    vector<vector<int>> par;
 
-    LCA(int n) : dep(n + 1), sz(n + 1), g(n + 1) {
-        par.assign(n + 1, vector<int>(LOG + 1));
+    lca_graph(int _n) : graph<T>(_n) {
+        max_depth = 31 - __builtin_clz(_n);
     }
-    void add_edge(int u, int v) {
-        g[u].push_back(v);
-        g[v].push_back(u); 
+
+    void build_lca(int from) {
+        depth = vector<int>(n + 1, 0);
+        sz = vector<int>(n + 1, 0);
+        par = vector<vector<int>>(n + 1, vector<int>(max_depth + 1));
+        dfs(from);
     }
-    void dfs(int u, int p = 0) {
-        par[u][0] = p;
-        sz[u] = 1;
-        for (int i = 1; i <= LOG; i++) par[u][i] = par[par[u][i - 1]][i - 1];
-        for (auto v : g[u]) if(v != p) {
-            dep[v] = dep[u] + 1;
-            dfs(v, u);
-            sz[u] += sz[v];
+
+    void dfs(int v, int p = 0) {
+        par[v][0] = p;
+        sz[v] = 1;
+        for (int i = 1; i <= max_depth; i++) par[v][i] = par[par[v][i - 1]][i - 1];
+        for (auto id : g[v]) {
+            auto &e = edges[id];
+            int to = e.from ^ e.to ^ v;
+            if(to == p) {
+                continue;
+            }
+            depth[to] = depth[v] + 1;
+            dfs(to, v);
+            sz[v] += sz[to];
         }
     }
-    int lca(int u, int v) {
-        if(dep[u] < dep[v]) swap(u, v);
-        u = kth(u, dep[u] - dep[v]); // move u to same depth as v
-        if(u == v) return u;
-        for (int i = LOG; i >= 0; i--) {
-            if(par[u][i] != par[v][i]) u = par[u][i], v = par[v][i];
-        }
-        return par[u][0];
-    }
+
     int kth(int u, int k) {
         assert(k >= 0);
-        for (int i = 0; i <= LOG; i++) {
+        for (int i = 0; i <= max_depth; i++) {
             if(k & (1 << i)) u = par[u][i];
         }
         return u;
     }
+
+    int lca(int u, int v) {
+        if(depth[u] < depth[v]) swap(u, v);
+        u = kth(u, depth[u] - depth[v]);
+        if(u == v) return u;
+        for (int k = max_depth; k >= 0; k--) {
+            if(par[u][k] != par[v][k]) u = par[u][k], v = par[v][k];
+        }
+        return par[u][0];
+    }
+
     int dist(int u, int v) {
         int l = lca(u, v);
-        return dep[u] + dep[v] - (dep[l] << 1);
+        return depth[u] + depth[v] - (depth[l] << 1);
     }
-    // kth node from u to v, 0th node is u
+
+    // k-th node from u to v, 0th node is u
     int go(int u, int v, int k) {
         int l = lca(u, v);
-        int d = dep[u] + dep[v] - (dep[l] << 1); 
-        assert(k <= d); 
-        if(dep[u] >= dep[l] + k) return kth(u, k);
-        k -= dep[u] - dep[l];
-        return kth(v, dep[v] - (dep[l] + k));
+        int d = depth[u] + depth[v] - (depth[l] << 1);
+        assert(k <= d);
+        if (depth[l] + k <= depth[u]) return kth(u, k);
+        k -= depth[u] - depth[l];
+        return kth(v, depth[v] - depth[l] - k);
     }
-    // checks if x is in between u->v path
-    bool isInPath(int u, int v, int x) {
+
+    bool is_ancestor(int u, int v) {
+        return depth[u] <= depth[v] && kth(v, depth[v] - depth[u]) == u;
+    }    
+
+    // checks if node x is in between u->v path
+    bool is_in_path(int u, int v, int x) {
         int l = lca(u, v), l1 = lca(u, x), l2 = lca(v, x);
         return (l == x || (l1 == l && l2 == x) || (l2 == l && l1 == x));
     }
-    // returns v's child in who's subtree u exists
-    int inBranch(int u, int v) {
-        if(dep[u] < dep[v]) swap(u, v);
-        u = kth(u, dep[u] - dep[v] - 1); // move u to 1 depth from v
-        return u;
+
+    // returns v's child in which subtree has node x (opposite if dep x<v)
+    int in_branch(int v, int x) {
+        if(depth[x] < depth[v]) swap(x, v);
+        x = kth(x, depth[x] - depth[v] - 1); // move x to 1 depth from v
+        return x;
     }
 };
