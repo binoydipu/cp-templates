@@ -43,8 +43,7 @@ class Modular {
     Modular operator-() const { return Modular(-value); }
     
     Modular &operator*=(const Modular &rhs) {
-        int64_t q = int64_t(static_cast<long double>(value) * rhs.value / mod());
-        value = normalize(value * rhs.value - q * mod()); 
+        value = normalize(static_cast<int64_t>(value) * static_cast<int64_t>(rhs.value));
         return *this;
     }
     template <typename U> Modular &operator*=(const U &other) { return *this *= Modular(other); }
@@ -54,8 +53,10 @@ class Modular {
     friend const Type& abs(const Modular& x) { return x.value; }
 
     bool operator==(const Modular &other) { return value == other.value; }
+    bool operator!=(const Modular &other) { return value != other.value; }
     template <typename U> bool operator==(const U &other) { return *this == Modular(other); }
-
+    template <typename U> bool operator!=(const U &other) { return *this != Modular(other); }
+    
     bool operator<(const Modular &other) { return value < other.value; }
     bool operator>(const Modular &other) { return value > other.value; }
 
@@ -81,7 +82,7 @@ template <int32_t MOD> Modular<MOD> operator/(const Modular<MOD>& lhs, const Mod
 template <int32_t MOD, typename U> Modular<MOD> operator/(const Modular<MOD>& lhs, U rhs) { return Modular<MOD>(lhs) /= rhs; }
 template <int32_t MOD, typename U> Modular<MOD> operator/(U lhs, const Modular<MOD>& rhs) { return Modular<MOD>(lhs) /= rhs; }
 
-const int md = 1e9 + 7;
+const int md = 998244353;
 using Mint = Modular<md>;
 
 template<typename U>
@@ -105,31 +106,15 @@ string to_string(const Mint& number) {
   return to_string(number());
 }
 
-// U == std::ostream? but done this way because of fastoutput
 template <typename U>
 U& operator<<(U& stream, const Mint& number) {
   return stream << number();
 }
 
-// U == std::istream? but done this way because of fastinput
 template <typename U>
 U& operator>>(U& stream, Mint& number) {
-    int32_t x;
+    int64_t x;
     stream >> x;
     number.value = Mint::normalize(x);
     return stream;
-}
-
-vector<Mint> fact(1, 1);
-vector<Mint> inv_fact(1, 1);
-
-Mint C(int n, int k) {
-    if (k < 0 || k > n) {
-        return 0;
-    }
-    while ((int) fact.size() < n + 1) {
-        fact.push_back(fact.back() * (int) fact.size());
-        inv_fact.push_back(1 / fact.back());
-    }
-    return fact[n] * inv_fact[k] * inv_fact[n - k];
 }
