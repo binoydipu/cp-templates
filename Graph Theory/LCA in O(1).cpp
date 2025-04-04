@@ -1,60 +1,86 @@
-template <class T>
-struct RMQ { // 0-based
-    vector<vector<T>> rmq;
-    T kInf = numeric_limits<T>::max();
-    void build(const vector<T>& V) {
-        int n = V.size(), on = 1, dep = 1;
-        while (on < n) on *= 2, ++dep;
-        rmq.assign(dep, V);
-    
-        for (int i = 0; i < dep - 1; i++) {
-            for (int j = 0; j < n; j++) {
-                rmq[i + 1][j] = min(rmq[i][j], rmq[i][min(n - 1, j + (1 << i))]);
+template <typename T> 
+class lca_graph : public graph<T> {
+  public:
+    using graph<T>::edges;
+    using graph<T>::g;
+    using graph<T>::n;
+
+    int max_depth;
+    vector<int> start; // enter time
+    vector<int> end; // exit time
+    vector<int> depth;
+    vector<int> sz;
+    vector<vector<int>> par;
+    vector<vector<int>> rmq;
+    vector<int> linear;
+
+    lca_graph(int _n) : graph<T>(_n) {
+        max_depth = 31 - __builtin_clz(_n);
+    }
+
+  private:
+    void build_rmq() {
+        int len = linear.size() - 1, dep = 0;
+        while((1 << dep) <= len) dep++; // log2(len)
+        rmq.resize(len + 1, vector<int>(dep));
+
+        for (int i = 1; i <= len; i++) rmq[i][0] = linear[i];
+        for (int k = 1; k < dep; k++) {
+            for (int i = 1; i + (1 << k) - 1 <= len; i++) {
+                int u = rmq[i][k - 1], v = rmq[i + (1 << (k - 1))][k - 1];
+                rmq[i][k] = depth[u] < depth[v] ? u : v;
             }
         }
     }
-    T query(int a, int b) { // [a, b)
-        if (b <= a) return kInf;
-        int dep = 31 - __builtin_clz(b - a); // log(b - a)
-        return min(rmq[dep][a], rmq[dep][b - (1 << dep)]);
+
+    int query(int from, int to) {
+        int k = 31 - __builtin_clz(to - from + 1);
+        int u = rmq[from][k], v = rmq[to - (1 << k) + 1][k];
+        return depth[u] < depth[v] ? u : v;
     }
-};
 
-struct LCA { // 0-based
-    vector<int> tin, depth, tout;
-    vector<vector<int>> G;
-    vector<pair<int, int>> linear;
-    RMQ<pair<int, int>> rmq;
-    int timer = 0;
-    
-    LCA() {} 
-    LCA(int n) : tin(n, -1), tout(n, -1), depth(n), G(n), linear(2 * n) {}
-
-    void dfs(int v, int dep) {
-        linear[timer] = {dep, v};
-        tin[v] = timer++;
-        depth[v] = dep;
-        for (auto u : G[v]){
-            if (tin[u] == -1) {
-                dfs(u, dep + 1);
-                linear[timer++] = {dep, v};
+    void dfs(int v) {
+        start[v] = (int)linear.size();
+        linear.push_back(v);
+        sz[v] = 1;
+        for(int id : g[v]) {
+            auto &e = edges[id];
+            int to = e.from ^ e.to ^ v;
+            if(start[to] != -1) { // visited
+                continue;
             }
+            depth[to] = 1 + depth[v];
+            dfs(to);
+            sz[v] += sz[to];
+            linear.push_back(v);
         }
-        tout[v] = timer;
+        end[v] = (int)linear.size() - 1;
     }
-    void add_edge(int a, int b) {
-        G[a].push_back(b);
-        G[b].push_back(a);
+
+  public:
+    void build_lca(int from) {
+        start = vector<int>(n + 1, -1);
+        end = vector<int>(n + 1, -1);
+        depth = vector<int>(n + 1, 0);
+        sz = vector<int>(n + 1, 0);
+        linear = vector<int>(1, -1);
+        par = vector<vector<int>>(n + 1, vector<int>(max_depth + 1));
+        dfs(from);
+        build_rmq();
     }
-    void build(int root) {
-        dfs(root, 0);
-        rmq.build(linear);
+
+    inline int lca(int u, int v) { // O(1)
+        u = start[u], v = start[v];
+        return query(min(u, v), max(u, v));
     }
-    int _query(int a, int b) {
-        a = tin[a], b = tin[b];
-        return rmq.query(min(a, b), max(a, b) + 1).second;
+
+    inline int dist(int u, int v) {
+        int l = lca(u, v);
+        return depth[u] + depth[v] - (depth[l] << 1);
     }
-    int dist(int a, int b) {
-        return depth[a] + depth[b] - 2 * depth[_query(a, b)];
+
+    inline bool is_ancestor(int u, int v) { // v... -> u
+        assert(u != v);
+        return start[v] < start[u] && end[v] > end[u];
     }
 };
