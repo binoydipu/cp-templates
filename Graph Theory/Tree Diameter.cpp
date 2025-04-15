@@ -1,47 +1,21 @@
-#include<bits/stdc++.h>
-using namespace std;
-
 template <typename T>
-int farthest(const graph<T> &g, int start, vector<int> &dist) {
-    dist.assign(g.n + 1, inf); // dist w.r.t start node
-    vector<bool> vis(g.n + 1, false);
-    vis[start] = true; 
-    dist[start] = 0;
-    queue<int> q; 
-    q.push(start);
-    int last = start;
-
-    while (!q.empty()) {
-        int v = q.front();
-        q.pop();
-        for (auto id : g.g[v]) {
+int find_diameter(const graph<T> &g) {
+    int d = 0;
+    function<int(int, int)> dfs = [&](int v, int p) {
+        int mx1 = 0, mx2 = 0; // two longest heights
+        for(auto id : g.g[v]) {
             auto &e = g.edges[id];
             int to = e.from ^ e.to ^ v;
-            if(vis[to]) {
+            if(to == p) {
                 continue;
             }
-            vis[to] = true;
-            dist[to] = dist[v] + 1;
-            q.push(to);
+            int h = dfs(to, v);
+            if(h > mx1) mx2 = mx1, mx1 = h;
+            else if(h > mx2) mx2 = h;
         }
-        last = v;
-    }
-    return last; // fartest node from start
-}
-
-int32_t main() {
-    int n;
-    cin >> n;
-    graph<int> g(n);
-    for (int i = 1; i < n; i++) {
-        int u, v;
-        cin >> u >> v;
-        g.add_edge(u, v);
-    }
-    vector<int> dist;
-    int x = farthest(g, 1, dist); // 1 to max dist node = x
-    int y = farthest(g, x, dist); // x to max dist node = y
-    cout << dist[y] << nl; // x to y path is the tree diameter
-
-    return 0;
+        d = max(d, mx1 + mx2); // diameter passing through this node
+        return mx1 + 1; // longest path downward
+    };
+    dfs(1, 0);
+    return d;
 }
