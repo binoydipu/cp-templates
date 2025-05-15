@@ -5,11 +5,13 @@ This repository contains a collection of **C++ templates** for competitive progr
 
 ## Features
 - **Efficient I/O Handling**: Fast input/output functions.
-- **Mathematical Utilities**: Modular arithmetic, number theory, prime sieve, etc.
-- **Graph Algorithms**: BFS, DFS, Dijkstra, LCA, Tarjan's SCC, etc.
-- **Data Structures**: Segment Tree, Fenwick Tree, Trie, Union-Find, etc.
-- **String Algorithms**: Hashing, KMP, Z-algorithm, Aho-Corasick, etc.
-- **Dynamic Programming**: SOS, Common DP tricks and optimizations.
+- **Basic**: Basic functions like hash, bitwise, random generator, etc.
+- **Data Structures**: Sparse Table, Segment Tree, Fenwick Tree, Trie, DSU, MO's, etc.
+- **Dynamic Programming**: Digit dp, SOS, Common DP tricks and optimizations.
+- **Geometry**: Points, Area, Segment, Polygon, etc.
+- **Graph Algorithms**: BFS, DFS, Cycle, SCC, Dijkstra, Centroid, LCA, HLD, TopoSort, etc.
+- **Mathematical Utilities**: Modular arithmetic, number theory, primality, combinatorics, etc.
+- **String Algorithms**: Hashing, KMP, Z-algorithm, Manacher, Aho-Corasick, etc.
 - **Custom Macros & Debugging Tools**: Shortcuts for frequent operations.
 
 
@@ -20,7 +22,7 @@ This repository contains a collection of **C++ templates** for competitive progr
    ```
 2. Include the required template in your solution file:
    ```cpp
-   #include "debug/debug.hpp"
+   #include "debug/debug.h"
    ```
 3. Compile and run your program:
    ```sh
