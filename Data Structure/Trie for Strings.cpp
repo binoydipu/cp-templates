@@ -1,60 +1,60 @@
-struct Node {
-    Node *nxt[26]; // 26 (a - z)
-    int pref, words; // current prefix & words cnt
-    Node() {
-        for (int i = 0; i < 26; i++) nxt[i] = NULL;
-        pref = words = 0;
-    }
-    bool exists(char ch) { // link already created
-        return (nxt[ch - 'a'] != NULL);
-    }
-    void create(char ch, Node *node) { // create new link
-        nxt[ch - 'a'] = node;
-    }
-};
 class Trie {
-private: Node *root;
-public: 
+  private:
+    static const int B = 26; // chars
+    struct node {
+        node *next[B];
+        int prefix, words;
+        node() {
+            for (int i = 0; i < B; i++) next[i] = nullptr;
+            prefix = words = 0;
+        }
+        inline bool exists(char c) {
+            return next[c - 'a'] != nullptr;
+        }
+        inline bool create(char c, node *n) {
+            next[c - 'a'] = n;
+        }
+        inline node* advance(char c) {
+            return next[c - 'a'];
+        }
+    } *root;
+
+  public:
     Trie() {
-        root = new Node();
+        root = new node();
     }
-    void insert(string word) {
-        Node *cur = root;
-        for (auto &ch : word) {
-            if(!cur->exists(ch)) { 
-                cur->create(ch, new Node());
-            }
-            cur = cur->nxt[ch - 'a']; 
-            cur->pref++;
+
+    void insert(string s) {
+        node *cur = root;
+        for(auto c : s) {
+            if(!cur->exists(c)) cur->create(c, new node());
+            cur = cur->advance(c);
+            cur->prefix++;
         }
         cur->words++;
     }
-    void remove(string word) {
-        Node *cur = root;
-        for (auto &ch : word) {
-            cur = cur->nxt[ch - 'a'];
-            cur->pref--;
+    void remove(string s) {
+        node *cur = root;
+        for(auto c : s) {
+            cur = cur->advance(c);
+            cur->prefix--;
         }
         cur->words--;
     }
-    int search(string word) {
-        Node *cur = root;
-        for (auto &ch : word) {
-            if(!cur->exists(ch)) {
-                return false;
-            }
-            cur = cur->nxt[ch - 'a']; 
+    int search(string s) {
+        node *cur = root;
+        for(auto c : s) {
+            if(!cur->exists(c)) return 0;
+            cur = cur->advance(c);
         }
         return cur->words;
     }
-    int startsWith(string prefix) {
-        Node *cur = root;
-        for (auto &ch : prefix) {
-            if(!cur->exists(ch)) {
-                return false;
-            }
-            cur = cur->nxt[ch - 'a']; 
+    int starts_with(string s) {
+        node *cur = root;
+        for(auto c : s) {
+            if(!cur->exists(c)) return 0;
+            cur = cur->advance(c);
         }
-        return cur->pref;
+        return cur->prefix;
     }
 };
