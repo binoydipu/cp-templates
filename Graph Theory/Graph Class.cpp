@@ -11,6 +11,7 @@ class graph {
     vector<vector<int>> g;
     int n;
 
+    graph() = default;
     graph(int _n) : n(_n) {
         g.resize(n + 1);
     }

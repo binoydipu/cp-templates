@@ -107,7 +107,6 @@ class tecc_graph : public graph<T> {
     int timer = 0;
     int comps = 0;
     graph<T> tree; // tree of 2-edge-connected components
-    // graph() = default; // add this line to graph template
 
     tecc_graph(int _n) : graph<T>(_n) {
         init();
